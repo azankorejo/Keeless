@@ -23,6 +23,16 @@ class UsingCustomAuthenticationPagesMiddleware
         if (!$domainExists->use_api) {
             return $next($request);
         }
-        return redirect()->away('https://'. config('app.url'). '/dashboard')->setStatusCode(302);
+        
+        // Parse the APP_URL to extract just the host
+        $appUrl = config('app.url');
+        $parsedUrl = parse_url($appUrl);
+        $scheme = $parsedUrl['scheme'] ?? $request->getScheme();
+        $host = $parsedUrl['host'] ?? $parsedUrl['path'] ?? 'localhost';
+        
+        // Build the correct URL without double slashes
+        $redirectUrl = rtrim($scheme . '://' . $host, '/') . '/dashboard';
+        
+        return redirect()->away($redirectUrl)->setStatusCode(302);
     }
 }

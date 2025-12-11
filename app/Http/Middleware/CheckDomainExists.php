@@ -21,13 +21,15 @@ class CheckDomainExists
     {
         $subdomain = $request->route('subdomain');
         if(!$subdomain) {
-            return redirect()->away('https://'. config('app.url'). '/dashboard')->setStatusCode(302);
+            // Use the configured APP_URL for redirects (works for both http and https)
+            return redirect()->away(config('app.url') . '/dashboard')->setStatusCode(302);
         }
         $domainExists = BusinessInformation::query()->withoutGlobalScopes()->where('domain', $subdomain)->exists();
         if ($domainExists) {
             return $next($request);
         }
 
-        return redirect()->away('https://'. config('app.url'))->setStatusCode(403);
+        // Use the configured APP_URL for redirects (works for both http and https)
+        return redirect()->away(config('app.url'))->setStatusCode(403);
     }
 }

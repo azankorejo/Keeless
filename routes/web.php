@@ -59,7 +59,10 @@ Route::get('/uploads/{filename}', [\App\Http\Controllers\UploadsIndexController:
 
 
 Route::middleware(CheckDomainExists::class)->withoutMiddleware(RedirectToSubdomain::class)->group(function() {
-    Route::domain('{subdomain}.' . config('app.url'))->group(function () {
+    $domain = parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost';
+    \Log::info($domain);
+
+    Route::domain('{subdomain}.' . $domain)->group(function () {
         Route::middleware(UsingCustomAuthenticationPagesMiddleware::class)->group(function () {
             Route::get('consumer/register', [\App\Http\Controllers\Domain\Auth\RegisterIndexController::class, '__invoke'])->name('consumer.register');
             Route::get('consumer/login', [LoginIndexController::class, '__invoke'])->name('consumer.login');
@@ -73,7 +76,8 @@ Route::middleware(CheckDomainExists::class)->withoutMiddleware(RedirectToSubdoma
 
 
 Route::middleware(CheckDomainExists::class)->withoutMiddleware(RedirectToSubdomain::class)->group(function() {
-    Route::domain('{subdomain}.' . config('app.url'))->group(function () {
+    $domain = parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost';
+    Route::domain('{subdomain}.' . $domain)->group(function () {
         Route::middleware(\App\Http\Middleware\ApiAuthenticationMiddleware::class)->prefix('api')->group(function() {
             Route::post('consumer/otp/verification', [\App\Http\Controllers\Domain\Auth\OTPVerificationController::class, '__invoke'])->name('consumer.otp-verify');
             Route::post('login', [\App\Http\Controllers\Domain\Api\V1\Auth\LoginController::class, '__invoke'])->name('consumer.login-post');

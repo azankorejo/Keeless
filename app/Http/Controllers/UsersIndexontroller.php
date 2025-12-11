@@ -21,7 +21,7 @@ class UsersIndexontroller extends Controller
         })
             ->orderByDesc('id')
             ->where('team_id', $teamId)
-            ->paginate(10, ['username', 'email', 'active', 'id']);
+            ->paginate(10, ['username', 'email', 'active', 'id', 'created_at']);
 
         return Inertia::render('Users', [
             'users' => $users,

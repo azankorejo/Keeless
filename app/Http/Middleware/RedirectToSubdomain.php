@@ -21,17 +21,34 @@ class RedirectToSubdomain
 
         // Parse the URL
         $parsedUrl = parse_url($currentUrl);
+        $host = $parsedUrl['host'] ?? '';
 
-        // Check if the host contains a subdomain
-        $hostParts = explode('.', $parsedUrl['host']);
-        $subdomain = count($hostParts) > 2 ? $hostParts[0] : null;
-        if(!$subdomain) {
+        // Check if the host is an IP address (not a domain name)
+        // IP addresses should not be processed for subdomain logic
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
             return $next($request);
         }
+
+        // Check if the host contains a subdomain
+        $hostParts = explode('.', $host);
+        
+        // For localhost, check if there are 2 parts (subdomain.localhost)
+        // For other domains, check if there are more than 2 parts (subdomain.domain.com)
+        $isLocalhost = in_array('localhost', $hostParts) || $host === 'localhost';
+        $hasSubdomain = $isLocalhost ? count($hostParts) >= 2 && $hostParts[0] !== 'localhost' 
+                                      : count($hostParts) > 2;
+        
+        if (!$hasSubdomain) {
+            return $next($request);
+        }
+        
+        $subdomain = $hostParts[0];
         $domain = BusinessInformation::query()->withoutGlobalScopes()->where('domain', $subdomain)->first();
         if ($domain) {
             return redirect()->route('consumer.login', $domain->domain);
         }
-        return redirect()->away('https://'. config('app.url'))->setStatusCode(403);
+        // Use the configured APP_URL scheme (http/https) for redirects
+        $appUrl = config('app.url');
+        return redirect()->away($appUrl)->setStatusCode(403);
     }
 }

@@ -24,7 +24,8 @@ class CheckPermittedDomains
 
         // If domain is not permitted, return 403 Forbidden
         if (!$permittedDomain) {
-            return redirect()->away('https://'. config('app.url'))->setStatusCode(403);
+            // Use the configured APP_URL for redirects (works for both http and https)
+            return redirect()->away(config('app.url'))->setStatusCode(403);
         }
 
         // Pass the request to the next middleware

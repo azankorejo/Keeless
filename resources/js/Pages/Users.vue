@@ -47,6 +47,18 @@ function closeModal (user) {
     showModal.value = false;
 }
 
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
 </script>
 <template>
     <AppLayout title="Dashboard">
@@ -101,6 +113,7 @@ function closeModal (user) {
                         <tr>
                             <th v-if="has_username" class="whitespace-nowrap text-left font-medium text-gray-900 p-5">Name</th>
                             <th class="whitespace-nowrap text-left font-medium text-gray-900 p-5">Email</th>
+                            <th class="whitespace-nowrap text-left font-medium text-gray-900 p-5">Registered at</th>
                             <th class="whitespace-nowrap text-left font-medium text-gray-900 p-5">Actions</th>
                         </tr>
                         </thead>
@@ -109,6 +122,7 @@ function closeModal (user) {
                         <tr v-for="(user) in users.data">
                             <td v-if="has_username" class="whitespace-nowrap p-5 text-gray-700">{{ user.username }}</td>
                             <td class="whitespace-nowrap p-5 text-gray-700">{{ user.email }}</td>
+                            <td class="whitespace-nowrap p-5 text-gray-700">{{ formatDate(user.created_at) }}</td>
                             <td class="whitespace-nowrap p-5 text-gray-700 flex items-center gap-4">
                                 <label class="inline-flex items-center cursor-pointer mt-2">
                                     <input type="checkbox" :checked="user.active" value="" v-on:change="toggleActivation($event.target.checked, user)"
